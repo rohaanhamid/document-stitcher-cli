@@ -1,0 +1,37 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun run test
+
+      - name: Build
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            bun build src/index.ts --compile --outfile bin/pdf-sticher.exe
+          else
+            bun build src/index.ts --compile --outfile bin/pdf-sticher
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-sticher-${{ matrix.os }}
+          path: bin/
