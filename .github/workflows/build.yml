@@ -23,12 +23,7 @@ jobs:
         run: bun run test
 
       - name: Build
-        run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            bun build src/index.ts --compile --outfile bin/pdf-sticher.exe
-          else
-            bun build src/index.ts --compile --outfile bin/pdf-sticher
-          fi
+        run: bun run ${{ matrix.os == 'windows-latest' && 'package:win' || (matrix.os == 'macos-latest' ? 'package:mac' : 'package:linux') }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
