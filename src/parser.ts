@@ -3,32 +3,6 @@ import MarkdownIt from 'markdown-it';
 import mathjax3 from 'markdown-it-mathjax3';
 import { imgSize } from "@mdit/plugin-img-size";
 
-// // Add page break rule
-// const pageBreak = (md: MarkdownIt) => {
-//   // Handle `---` for page breaks
-//   const temp = md.renderer.rules.fence?.bind(md.renderer.rules);
-//   md.renderer.rules.fence = (tokens, idx, options, env, self) => {
-//     const token = tokens[idx];
-//     if (token.content.trim() === '---') {
-//       return '<div style="page-break-after: always;"></div>';
-//     }
-//     return temp ? temp(tokens, idx, options, env, self) : '';
-//   };
-
-//   // Handle `\pagebreak` for page breaks
-//   md.core.ruler.after('inline', 'pagebreak', (state) => {
-//     const Token = state.Token;
-//     for (let i = 0; i < state.tokens.length; i++) {
-//       if (state.tokens[i].content === '\\pagebreak') {
-//         const token = new Token('html_block', '', 0);
-//         token.block = true;
-//         token.content = '<div style="page-break-after: always;"></div>';
-//         state.tokens[i] = token;
-//       }
-//     }
-//   });
-// };
-
 const md = new MarkdownIt({
   html: true,
   linkify: true,
