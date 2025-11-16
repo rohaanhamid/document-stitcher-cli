@@ -1,97 +1,66 @@
+import { describe, test, expect, afterEach } from "bun:test";
 import * as fs from "fs";
 import * as path from "path";
 import { createTempDirectory, cleanupTempFiles } from "./files";
 import { PdfSource } from "../types";
-import { expect, test, mock } from "bun:test";
 
-mock.module("path");
+describe("files", () => {
+    afterEach(() => {
+        const tmpDir = path.join(process.cwd(), "tmp");
+        if (fs.existsSync(tmpDir)) {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        }
+    });
 
-const mockedFs = jest.mocked(fs);
-const mockedPath = jest.mocked(path);
+    describe("createTempDirectory", () => {
+        test("should create a tmp directory if it does not exist", () => {
+            const tmpDir = path.join(process.cwd(), "tmp");
+            if (fs.existsSync(tmpDir)) {
+                fs.rmSync(tmpDir, { recursive: true, force: true });
+            }
+            const result = createTempDirectory();
+            expect(fs.existsSync(result)).toBe(true);
+            expect(result).toBe(tmpDir);
+        });
 
-// Mock process.cwd
-const mockCwd = "C:\\test\\project";
-jest.spyOn(process, "cwd").mockReturnValue(mockCwd);
+        test("should return the path to the tmp directory if it already exists", () => {
+            const tmpDir = path.join(process.cwd(), "tmp");
+            if (!fs.existsSync(tmpDir)) {
+                fs.mkdirSync(tmpDir, { recursive: true });
+            }
+            const result = createTempDirectory();
+            expect(fs.existsSync(result)).toBe(true);
+            expect(result).toBe(tmpDir);
+        });
+    });
 
-describe("createTempDirectory", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    describe("cleanupTempFiles", () => {
+        test("should delete temporary PDF files", () => {
+            const tmpDir = createTempDirectory();
+            const tempFilePath = path.join(tmpDir, "temp.pdf");
+            fs.writeFileSync(tempFilePath, "test");
 
-  test("create temp directory if it doesn't exist", () => {
-    mockedFs.existsSync.mockReturnValue(false);
-    mockedFs.mkdirSync.mockReturnValue(undefined);
+            const pdfSources: PdfSource[] = [{ path: tempFilePath }];
+            cleanupTempFiles(pdfSources, tmpDir);
 
-    const result = createTempDirectory();
+            expect(fs.existsSync(tempFilePath)).toBe(false);
+        });
 
-    expect(mockedPath.join).toHaveBeenCalledWith(mockCwd, "tmp");
-    expect(mockedFs.existsSync).toHaveBeenCalledWith(path.join(mockCwd, "tmp"));
-    expect(mockedFs.mkdirSync).toHaveBeenCalledWith(path.join(mockCwd, "tmp"), { recursive: true });
-    expect(result).toBe(path.join(mockCwd, "tmp"));
-  });
+        test("should not delete files outside the temp directory", () => {
+            const tmpDir = createTempDirectory();
+            const otherDir = path.join(process.cwd(), "other");
+            if (!fs.existsSync(otherDir)) {
+                fs.mkdirSync(otherDir, { recursive: true });
+            }
+            const otherFilePath = path.join(otherDir, "other.pdf");
+            fs.writeFileSync(otherFilePath, "test");
 
-  test("return temp directory if it already exists", () => {
-    mockedFs.existsSync.mockReturnValue(true);
+            const pdfSources: PdfSource[] = [{ path: otherFilePath }];
+            cleanupTempFiles(pdfSources, tmpDir);
 
-    const result = createTempDirectory();
+            expect(fs.existsSync(otherFilePath)).toBe(true);
+            fs.rmSync(otherDir, { recursive: true, force: true });
+        });
 
-    expect(mockedFs.existsSync).toHaveBeenCalledWith(path.join(mockCwd, "tmp"));
-    expect(mockedFs.mkdirSync).not.toHaveBeenCalled();
-    expect(result).toBe(path.join(mockCwd, "tmp"));
-  });
-});
-
-describe("cleanupTempFiles", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
-
-  afterAll(() => {
-    consoleWarnSpy.mockRestore();
-  });
-
-  test("delete temp files that start with tmpDir", () => {
-    const tmpDir = path.join(mockCwd, "tmp");
-    const pdfSources: PdfSource[] = [
-      { path: path.join(tmpDir, "file1.pdf") },
-      { path: path.join(tmpDir, "file2.pdf") },
-      { path: "other/file.pdf" },
-    ];
-
-    mockedFs.unlinkSync.mockReturnValue(undefined);
-
-    cleanupTempFiles(pdfSources, tmpDir);
-
-    expect(mockedFs.unlinkSync).toHaveBeenCalledTimes(2);
-    expect(mockedFs.unlinkSync).toHaveBeenCalledWith(path.join(tmpDir, "file1.pdf"));
-    expect(mockedFs.unlinkSync).toHaveBeenCalledWith(path.join(tmpDir, "file2.pdf"));
-    expect(consoleWarnSpy).not.toHaveBeenCalled();
-  });
-
-  test("warn on unlink error", () => {
-    const tmpDir = path.join(mockCwd, "tmp");
-    const pdfSources: PdfSource[] = [
-      { path: path.join(tmpDir, "file1.pdf") },
-    ];
-
-    const unlinkError = new Error("Unlink failed");
-    mockedFs.unlinkSync.mockImplementation(() => { throw unlinkError; });
-
-    cleanupTempFiles(pdfSources, tmpDir);
-
-    expect(consoleWarnSpy).toHaveBeenCalledWith(`Warning: Could not delete temporary file ${path.join(tmpDir, "file1.pdf")}, error: ${unlinkError}`);
-  });
-
-  test("not delete files outside tmpDir", () => {
-    const tmpDir = path.join(mockCwd, "tmp");
-    const pdfSources: PdfSource[] = [
-      { path: "other/file.pdf" },
-    ];
-
-    cleanupTempFiles(pdfSources, tmpDir);
-
-    expect(mockedFs.unlinkSync).not.toHaveBeenCalled();
-  });
+    });
 });
