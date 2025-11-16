@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { PdfSource } from "../types/PDFSource";
+import { PdfSource } from '../types';
 
 /**
  * Ensures that a temporary directory exists and returns its path.

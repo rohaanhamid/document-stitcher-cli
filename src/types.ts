@@ -5,6 +5,14 @@ export interface ConversionOptions {
   theme?: string;
 }
 
+export interface PdfSource {
+  path: string;
+  pageOptions?: {
+    skip?: number[];
+    include?: number[];
+  };
+}
+
 // Types for markdown chunks
 export type MarkdownChunk = { type: 'markdown'; content: string };
 export type PdfChunk = { type: 'pdf'; path: string; pageOptions?: { skip?: number[]; include?: number[] } };

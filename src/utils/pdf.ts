@@ -2,8 +2,7 @@ import puppeteer from 'puppeteer';
 import { PDFDocument } from 'pdf-lib';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PdfSource } from '../types/PDFSource';
-import { Chunk } from '../types';
+import { Chunk, PdfSource } from '../types';
 import { convertMarkdownToHtml, resolveLinks } from './markdown';
 
 
@@ -16,9 +15,6 @@ export async function convertHtmlToPdf(html: string, outputFilePath: string): Pr
   const template = fs.readFileSync(templatePath, 'utf-8');
   const css = fs.readFileSync(cssPath, 'utf-8');
   const finalHtml = template.replace('{{content}}', html).replace('{{css}}', css);
-
-  // Debug: write the final HTML to a file
-  fs.writeFileSync('debug.html', finalHtml);
 
   await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
 
