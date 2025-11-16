@@ -80,7 +80,7 @@ export async function processChunksToPdfSources(chunks: Chunk[], inputPath: stri
       try {
         await fs.promises.access(pdfPath, fs.constants.F_OK);
         pdfsToMerge.push({ path: pdfPath, pageOptions: chunk.pageOptions });
-      } catch (error) {
+      } catch {
         console.warn(`Warning: PDF file not found: ${path.relative(process.cwd(), pdfPath)}. Skipping...`);
       }
     } else if (chunk.content.trim()) {

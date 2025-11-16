@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from 'jest';
+
+const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.ts'],
@@ -23,3 +25,5 @@ module.exports = {
     nodeOptions: '--experimental-vm-modules',
   },
 };
+
+export default config;

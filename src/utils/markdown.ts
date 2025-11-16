@@ -59,7 +59,7 @@ export function convertMarkdownToHtml(markdown: string): string {
  * @returns 
  */
 export function parseMarkdownIntoChunks(markdown: string): Chunk[] {
-    const pdfLinkRegex = /\!\[([^\]]+)\]\(([^)]+\.pdf)\)(?:\{([^}]*)\})?/g;
+    const pdfLinkRegex = /!\[([^\]]+)\]\(([^)]+\.pdf)\)(?:\{([^}]*)\})?/g;
     const chunks: Chunk[] = [];
     let lastIndex = 0;
     let match;

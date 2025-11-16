@@ -25,7 +25,7 @@ export function cleanupTempFiles(pdfSources: PdfSource[], tmpDir: string): void 
         try {
             fs.unlinkSync(tempPdf.path);
         } catch (error) {
-            console.warn(`Warning: Could not delete temporary file ${tempPdf.path}`);
+            console.warn(`Warning: Could not delete temporary file ${tempPdf.path}, error: ${error}`);
         }
     }
 }
