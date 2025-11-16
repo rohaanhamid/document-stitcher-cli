@@ -42,7 +42,7 @@ export function resolveLinks(markdown: string, baseDir: string): string {
   });
 }
 
-export function applyPagebreaks(markdown: string): string {
+function applyPagebreaks(markdown: string): string {
   return markdown.replace(/\\pagebreak/g, '<div style="page-break-after: always;"></div>');
 }
 
@@ -77,7 +77,7 @@ export function parseMarkdownIntoChunks(markdown: string): Chunk[] {
     const path = match[2];
     if (!path) continue;
     const optionsStr = match[3] || "";
-    let pageOptions: { skip?: number[]; include?: number[] } | undefined;
+    let pageOptions: { skip?: number[]; include?: number[] } = {};
 
     if (optionsStr.trim()) {
       const skipMatch = optionsStr.match(/skip:\s*\[([^\]]*)\]/);
@@ -87,7 +87,6 @@ export function parseMarkdownIntoChunks(markdown: string): Chunk[] {
         throw new Error(`Cannot specify both 'skip' and 'include' options for PDF: ${path}`);
       }
 
-      pageOptions = {};
       if (skipMatch && skipMatch[1]) {
         pageOptions.skip = skipMatch[1]
           .split(",")
