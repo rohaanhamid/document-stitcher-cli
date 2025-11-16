@@ -2,13 +2,8 @@
   "name": "pdf-sticher",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "bin": {
-    "pdf-sticher": "dist/index.js"
-  },
   "scripts": {
     "start": "bun run src/index.ts",
-    "package": "bun build src/index.ts --compile --outfile bin/pdf-sticher",
     "package:win": "bun build src/index.ts --compile --outfile bin/pdf-sticher.exe",
     "package:mac": "bun build src/index.ts --compile --outfile bin/pdf-sticher",
     "package:linux": "bun build src/index.ts --compile --outfile bin/pdf-sticher",
