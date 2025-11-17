@@ -72,21 +72,20 @@ describe("markdown", () => {
     });
 
     test("should handle pdf links with skip options", () => {
-      const markdown = "![pdf](./test.pdf){skip: [1, 2]}";
+      const markdown = "![pdf !=1,2](./test.pdf)";
       const result = parseMarkdownIntoChunks(markdown);
       expect(result).toEqual([{ type: "pdf", path: "./test.pdf", pageOptions: { skip: [1, 2] } }]);
     });
 
     test("should handle pdf links with include options", () => {
-      const markdown = "![pdf](./test.pdf){include: [3, 4]}";
+      const markdown = "![pdf =3,4](./test.pdf)";
       const result = parseMarkdownIntoChunks(markdown);
-      expect(result).toEqual([
-        { type: "pdf", path: "./test.pdf", pageOptions: { include: [3, 4] } },
-      ]);
+      expect(result).toEqual([{ type: "pdf", path: "./test.pdf", pageOptions: { include: [3, 4] } }]);
     });
 
     test("should throw error if both skip and include are provided", () => {
-      const markdown = "![pdf](./test.pdf){skip: [1], include: [2]}";
+      // Provide both operators in the alt text to simulate a conflicting spec
+      const markdown = "![pdf !=1 =2](./test.pdf)";
       expect(() => parseMarkdownIntoChunks(markdown)).toThrow();
     });
 

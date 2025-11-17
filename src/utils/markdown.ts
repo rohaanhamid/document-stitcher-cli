@@ -124,7 +124,12 @@ export function convertMarkdownToHtml(markdown: string): string {
  * @returns
  */
 export function parseMarkdownIntoChunks(markdown: string): Chunk[] {
-  const pdfLinkRegex = /!\[([^\]]+)\]\(([^)]+\.pdf)\)(?:\{([^}]*)\})?/g;
+  // Match markdown image links that point to PDFs. The alt text may contain
+  // inline page option specifiers using the syntax:
+  //   skip: use "!=1,2,3" (e.g. `![pdf !=1,2](./file.pdf)`)
+  //   include: use "=1,2,3" (e.g. `![pdf =3,4](./file.pdf)`)
+  // We capture the alt text as the first group and the PDF path as the second.
+  const pdfLinkRegex = /!\[([^\]]+)\]\(([^)]+\.pdf)\)/g;
   const chunks: Chunk[] = [];
   let lastIndex = 0;
   let match;
@@ -136,27 +141,40 @@ export function parseMarkdownIntoChunks(markdown: string): Chunk[] {
 
     const path = match[2];
     if (!path) continue;
-    const optionsStr = match[3] || "";
+
+    // Parse options embedded in the alt text (match[1]). Examples:
+    //  - "pdf !=1,2"  -> skip: [1,2]
+    //  - "pdf =3,4"   -> include: [3,4]
+    const altText = match[1] || "";
     let pageOptions: { skip?: number[]; include?: number[] } = {};
 
-    if (optionsStr.trim()) {
-      const skipMatch = optionsStr.match(/skip:\s*\[([^\]]*)\]/);
-      const includeMatch = optionsStr.match(/include:\s*\[([^\]]*)\]/);
+    // Find all operator occurrences in the alt text. Operators are either
+    // '!=' for skip or '=' for include, followed by a comma-separated list
+    // of page numbers. We allow optional whitespace.
+    const optionPattern = /(!=|=)\s*([0-9]+(?:\s*,\s*[0-9]+)*)/g;
+    const opMatches = Array.from(altText.matchAll(optionPattern));
 
-      if (skipMatch && includeMatch) {
+    if (opMatches.length > 0) {
+      const hasSkip = opMatches.some((m) => m[1] === "!=");
+      const hasInclude = opMatches.some((m) => m[1] === "=");
+      if (hasSkip && hasInclude) {
         throw new Error(`Cannot specify both 'skip' and 'include' options for PDF: ${path}`);
       }
 
-      if (skipMatch && skipMatch[1]) {
-        pageOptions.skip = skipMatch[1]
-          .split(",")
-          .map((s) => parseInt(s.trim()))
-          .filter((n) => !isNaN(n));
-      } else if (includeMatch && includeMatch[1]) {
-        pageOptions.include = includeMatch[1]
-          .split(",")
-          .map((s) => parseInt(s.trim()))
-          .filter((n) => !isNaN(n));
+      // Only handle the first match for the specified operator (others ignored
+      // unless both types are present which we reject above).
+      const m = opMatches[0]!;
+      const op = m[1]!;
+      const nums = m[2]!;
+      const parsed = nums
+        .split(",")
+        .map((s) => parseInt(s.trim()))
+        .filter((n) => !isNaN(n));
+
+      if (op === "!=") {
+        pageOptions.skip = parsed;
+      } else if (op === "=") {
+        pageOptions.include = parsed;
       }
     }
 
