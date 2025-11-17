@@ -129,3 +129,5 @@ yarn-error.log*
 debug.html
 
 bin/
+
+test-output/
