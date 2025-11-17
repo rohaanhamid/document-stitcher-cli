@@ -58,24 +58,19 @@ jobs:
 
       - name: Download artifacts
         run: |
-          set -e
+          set -euo pipefail
           echo "Artifacts file contents:" && cat artifacts.json
           mkdir -p downloaded_artifacts
-          node -e "
-            const fs = require('fs');
-            const artifacts = JSON.parse(fs.readFileSync('artifacts.json','utf8')).artifacts;
-            const token = process.env.GITHUB_TOKEN;
-            const {spawnSync} = require('child_process');
-            for(const a of artifacts){
-              const url = a.archive_download_url;
-              const file = `downloaded_artifacts/${a.name}.zip`;
-              console.log('Downloading', a.name, '->', file);
-              const curl = spawnSync('curl', ['-L', '-H', `Authorization: token ${token}`, '-o', file, url], {stdio:'inherit'});
-              if(curl.status !== 0) process.exit(curl.status);
-              const unzip = spawnSync('unzip', ['-o', file, '-d', `downloaded_artifacts/${a.name}`], {stdio:'inherit'});
-              if(unzip.status !== 0) process.exit(unzip.status);
-            }
-          "
+          jq -c '.artifacts[]' artifacts.json | while read -r a; do
+            name=$(echo "$a" | jq -r '.name')
+            url=$(echo "$a" | jq -r '.archive_download_url')
+            echo "Downloading $name -> downloaded_artifacts/$name"
+            mkdir -p "downloaded_artifacts/$name"
+            tmp=$(mktemp)
+            curl -L -H "Authorization: token $GITHUB_TOKEN" -o "$tmp" "$url"
+            unzip -o "$tmp" -d "downloaded_artifacts/$name"
+            rm -f "$tmp"
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
