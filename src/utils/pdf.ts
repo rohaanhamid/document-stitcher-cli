@@ -5,6 +5,10 @@ import * as path from "path";
 import { Chunk, PdfSource } from "../types";
 import { convertMarkdownToHtml, resolveLinks } from "./markdown";
 
+// @ts-expect-error CSS import fails here unfortunately
+import defaultCssFile from "../templates/styles/default.css" with { type: "file" };
+import templateFile from "../templates/base.html" with { type: "file" };
+
 /**
  * Converts HTML content to a PDF file.
  *
@@ -15,10 +19,9 @@ export async function convertHtmlToPdf(html: string, outputFilePath: string): Pr
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  const templatePath = path.join(process.cwd(), "templates", "base.html");
-  const cssPath = path.join(process.cwd(), "templates", "styles", "default.css");
-  const template = fs.readFileSync(templatePath, "utf-8");
-  const css = fs.readFileSync(cssPath, "utf-8");
+  // @ts-expect-error CSS import fails here unfortunately
+  const template = fs.readFileSync(templateFile, "utf-8");
+  const css = fs.readFileSync(defaultCssFile, "utf-8");
   const finalHtml = template.replace("{{content}}", html).replace("{{css}}", css);
 
   await page.setContent(finalHtml, { waitUntil: "networkidle0" });
