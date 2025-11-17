@@ -1,12 +1,12 @@
 {
-  "name": "pdf-sticher",
+  "name": "document-stitcher",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "start": "bun run src/index.ts",
-    "package:win": "bun build --compile --outfile bin/pdf-sticher.exe src/index.ts",
-    "package:mac": "bun build --compile --outfile bin/pdf-sticher src/index.ts",
-    "package:linux": "bun build --compile --outfile bin/pdf-sticher src/index.ts",
+    "package:win": "bun build --compile --outfile bin/document-stitcher.exe src/index.ts",
+    "package:mac": "bun build --compile --outfile bin/document-stitcher src/index.ts",
+    "package:linux": "bun build --compile --outfile bin/document-stitcher src/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "lint": "eslint .",

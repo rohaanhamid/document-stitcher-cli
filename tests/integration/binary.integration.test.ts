@@ -8,12 +8,12 @@ const ROOT = process.cwd();
 function getPlatformScriptAndBinary(): { script: string; binary: string } {
   const platform = process.platform;
   if (platform === "win32") {
-    return { script: "package:win", binary: path.join(ROOT, "bin", "pdf-sticher.exe") };
+    return { script: "package:win", binary: path.join(ROOT, "bin", "document-stitcher.exe") };
   }
   if (platform === "darwin") {
-    return { script: "package:mac", binary: path.join(ROOT, "bin", "pdf-sticher") };
+    return { script: "package:mac", binary: path.join(ROOT, "bin", "document-stitcher") };
   }
-  return { script: "package:linux", binary: path.join(ROOT, "bin", "pdf-sticher") };
+  return { script: "package:linux", binary: path.join(ROOT, "bin", "document-stitcher") };
 }
 
 test("build binary and generate PDFs from generated markdowns", async () => {

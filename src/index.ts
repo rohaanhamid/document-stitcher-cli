@@ -42,7 +42,7 @@ export async function convertMarkdownToPdf(
 const program = new Command();
 
 program
-  .name("pdf-sticher")
+  .name("document-stitcher")
   .description("Convert markdown files to PDF, resolving relative links and embedding PDFs")
   .version("1.0.0")
   .option("--debug-html", "Write intermediate HTML files next to generated PDFs")

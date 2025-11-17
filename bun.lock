@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "pdf-sticher",
+      "name": "document-stitcher",
       "dependencies": {
         "@mdit/plugin-img-size": "^0.22.3",
         "commander": "^14.0.2",
