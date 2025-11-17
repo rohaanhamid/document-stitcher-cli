@@ -60,7 +60,28 @@ export async function convertHtmlToPdf(
     }
   }
 
-  await page.setContent(finalHtml, { waitUntil: "networkidle0" });
+  // Use a slightly more permissive network idle and increase the timeout to
+  // avoid flaky CI failures when external resources are slow or blocked.
+  // Also set a default navigation timeout on the page so Puppeteer's internal
+  // navigation watchers use the same timeout value.
+  const navigationTimeout = 60000; // 60s
+  const maybeSetDefaultNavTimeout = page as unknown as {
+    setDefaultNavigationTimeout?: (t: number) => void;
+  };
+  maybeSetDefaultNavTimeout.setDefaultNavigationTimeout?.(navigationTimeout);
+
+  try {
+    await page.setContent(finalHtml, { waitUntil: "networkidle2", timeout: navigationTimeout });
+  } catch (err) {
+    // If setContent times out, warn and continue: in CI some external requests
+    // (fonts, images) may hang or be blocked and we still want to produce a PDF.
+    const msg = err instanceof Error ? err.message : String(err);
+    if (/Navigation timeout|TimeoutError/i.test(msg)) {
+      console.warn("Warning: page.setContent timed out - continuing without full network idle.");
+    } else {
+      throw err;
+    }
+  }
 
   await page.pdf({
     path: outputFilePath,

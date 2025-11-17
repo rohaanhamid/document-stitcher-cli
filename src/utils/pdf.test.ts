@@ -124,7 +124,8 @@ describe("pdf utils", () => {
   </body>
 </html>`;
       expect(mockPage.setContent).toHaveBeenCalledWith(expectedHtml, {
-        waitUntil: "networkidle0",
+        timeout: 60000,
+        waitUntil: "networkidle2",
       });
       expect(mockPage.pdf).toHaveBeenCalledWith({
         path: outputFilePath,
