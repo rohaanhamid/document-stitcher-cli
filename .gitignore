@@ -91,6 +91,7 @@ tmp/
 *.pdf
 # Keep fixture PDFs
 !tests/fixtures/pdf/**
+!test-docs/**/*.pdf
 
 # IDE specific files
 .vscode/*

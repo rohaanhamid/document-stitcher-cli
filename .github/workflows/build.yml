@@ -30,7 +30,7 @@ jobs:
         run: bun run test
 
       - name: Run integration tests
-        run: bun test "tests/integration/**/*.test.ts"
+        run: bun run test:integration"
 
       - name: Build
         run: bun run ${{ matrix.pkg }}
