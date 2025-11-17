@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { spawnSync } from "child_process";
 import { test, expect } from "bun:test";
+import { PDFParse } from "pdf-parse";
 
 const ROOT = process.cwd();
 
@@ -20,6 +21,7 @@ test(
   "build binary and generate PDFs from generated markdowns",
   async () => {
     const { script, binary } = getPlatformScriptAndBinary();
+    const fixturesDir = path.join(ROOT, "tests", "fixtures", "pdf");
 
     // Clean output dir
     const outputDir = path.join(ROOT, "test-output", "integration");
@@ -63,6 +65,7 @@ test(
       const inputPath = path.join(inputDir, f);
       const outName = `${path.basename(f).replace(/\.md$/, "")}-generated.pdf`;
       const outputPath = path.join(outputDir, outName);
+      const referencePath = path.join(fixturesDir, outName);
 
       console.log(`Generating PDF for ${inputPath} -> ${outputPath}`);
       const run = spawnSync(binary, [inputPath, outputPath], {
@@ -79,6 +82,12 @@ test(
       }
 
       expect(fs.existsSync(outputPath)).toBe(true);
+
+      const outputText = new PDFParse({
+        url: outputPath,
+      }).getText();
+      const referenceText = new PDFParse({ url: referencePath }).getText();
+      expect(await outputText).toEqual(await referenceText);
     }
   },
   { timeout: 30 * 60 * 1000 }
